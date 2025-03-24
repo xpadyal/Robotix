@@ -1,0 +1,86 @@
+version: '3.8'
+services:
+  redis:
+    image: redis:7
+    container_name: redis
+    networks:
+      - robotix-network
+    ports:
+      - "6379:6379"
+
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    container_name: zookeeper
+    networks:
+      - robotix-network
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: wurstmeister/kafka:2.13-2.8.1
+    container_name: kafka
+    networks:
+      - robotix-network
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_LOG_RETENTION_MS=3600000
+      - JMX_PORT=9101
+    ports:
+      - "9092:9092"
+      - "9101:9101"
+    depends_on:
+      - zookeeper
+
+  simulation:
+    image: simulation:latest
+    container_name: simulation
+    networks:
+      - robotix-network
+    environment:
+      - MODE=simulation
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      kafka:
+        condition: service_started
+
+  consumer:
+    image: simulation:latest
+    container_name: consumer
+    networks:
+      - robotix-network
+    environment:
+      - MODE=consumer
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_started
+
+  dashboard:
+    image: dashboard:latest
+    container_name: dashboard
+    networks:
+      - robotix-network
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+
+networks:
+  robotix-network:
+    driver: bridge

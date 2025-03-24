@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Robot Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Warehouse Robot Fleet Sahil Dashboard</h1>
+    </header>
+    
+    <div class="dashboard-grid">
+        <div class="section warehouse-map">
+            <h2>Warehouse Map</h2>
+            <div id="map-container">
+                <div class="warehouse-layout">
+                    <!-- Shelf areas -->
+                    <div class="shelf" style="top: 20%; left: 20%"></div>
+                    <div class="shelf" style="top: 20%; left: 40%"></div>
+                    <div class="shelf" style="top: 20%; left: 60%"></div>
+                    <div class="shelf" style="top: 60%; left: 20%"></div>
+                    <div class="shelf" style="top: 60%; left: 40%"></div>
+                    <div class="shelf" style="top: 60%; left: 60%"></div>
+                    
+                    <!-- Robot markers will be added dynamically -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="section robot-stats">
+            <h2>Robot Status</h2>
+            <div id="robot-status-cards">
+                <!-- Robot status cards will be added dynamically -->
+            </div>
+        </div>
+        
+        <div class="section task-control">
+            <h2>Task Control</h2>
+            <form id="task-form">
+                <select id="robot-select">
+                    <option value="">Select Robot</option>
+                    
+                    <option value="1">Robot 1</option>
+                    <option value="2">Robot 2</option>
+                    <option value="3">Robot 3</option>
+                    <option value="4">Robot 4</option>
+                </select>
+                
+                <select id="task-select">
+                    <option value="">Select Task</option>
+                    <option value="picking">Item Picking</option>
+                    <option value="sorting">Sorting</option>
+                    <option value="inventory">Inventory Check</option>
+                    <option value="charging">Return to Charging</option>
+                </select>
+                
+                <button type="submit">Assign Task</button>
+            </form>
+        </div>
+        
+        <div class="section system-stats">
+            <h2>System Statistics</h2>
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <h3>Active Robots</h3>
+                    <p id="active-robots">0/5</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Tasks Completed</h3>
+                    <p id="tasks-completed">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>System Health</h3>
+                    <p id="system-health">Good</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Avg Battery</h3>
+                    <p id="avg-battery">100%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/dashboard.js"></script>
+</body>
+</html> 

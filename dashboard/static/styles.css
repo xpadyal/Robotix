@@ -1,0 +1,522 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f5f7fa;
+}
+
+header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, auto);
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.section {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+}
+
+.warehouse-map {
+    grid-column: 1 / 3;
+    grid-row: 1 / 3;
+}
+
+.robot-stats {
+    grid-column: 3;
+    grid-row: 1;
+}
+
+.task-control {
+    grid-column: 3;
+    grid-row: 2;
+}
+
+.system-stats {
+    grid-column: 1 / 3;
+    grid-row: 3;
+}
+
+h2 {
+    margin-bottom: 1rem;
+    color: #2c3e50;
+    font-size: 1.2rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+/* Warehouse map */
+#map-container {
+    height: 500px;
+    position: relative;
+    background-color: #f0f2f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.warehouse-layout {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.shelf {
+    position: absolute;
+    width: 10%;
+    height: 10%;
+    background-color: #95a5a6;
+    border-radius: 2px;
+}
+
+.robot {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    transition: all 0.5s ease;
+}
+
+/* Robot status cards */
+#robot-status-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.robot-card {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.75rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem;
+}
+
+.robot-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    grid-row: span 2;
+}
+
+.robot-details h3 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.robot-details p {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}
+
+.battery-indicator {
+    height: 8px;
+    background-color: #ecf0f1;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+.battery-level {
+    height: 100%;
+    background-color: #2ecc71;
+    border-radius: 4px;
+}
+
+/* Task form */
+#task-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+select, button {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+/* System stats */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.stat-card {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.stat-card h3 {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-bottom: 0.5rem;
+}
+
+.stat-card p {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* Status colors */
+.status-active {
+    background-color: #2ecc71;
+}
+
+.status-busy {
+    background-color: #f39c12;
+}
+
+.status-charging {
+    background-color: #3498db;
+}
+
+.status-inactive {
+    background-color: #95a5a6;
+}
+
+.status-error {
+    background-color: #e74c3c;
+}
+
+/* Connection status message */
+#connection-status {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 10px;
+    text-align: center;
+    z-index: 1000;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.connection-info {
+    background-color: #3498db;
+    color: white;
+}
+
+.connection-error {
+    background-color: #e74c3c;
+    color: white;
+}
+
+/* Loading bar styles */
+#loading-bar-container {
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.loading-message {
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.loading-bar-wrapper {
+    height: 10px;
+    background-color: #ecf0f1;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.loading-bar {
+    height: 100%;
+    width: 30%;
+    background-color: #3498db;
+    border-radius: 5px;
+    animation: loading 1.5s infinite ease-in-out;
+}
+
+@keyframes loading {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(400%);
+    }
+}
+
+/* Error message in robot card */
+.error-message {
+    color: #e74c3c;
+    font-size: 0.8rem;
+    margin-top: 3px;
+}
+
+/* Fix for WebSocket disconnect issues - make sure elements exist */
+#robot-status-cards:empty::after {
+    content: "No robot data available";
+    display: block;
+    padding: 1rem;
+    text-align: center;
+    color: #7f8c8d;
+    border: 1px dashed #ddd;
+    border-radius: 4px;
+}
+
+/* Fix for map container with no robots */
+.warehouse-layout:empty::after {
+    content: "No robot data available";
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #7f8c8d;
+} 
+
+/* Add to your CSS */
+.low-battery {
+    border: 2px solid #ff0000;
+    animation: pulse 1s infinite;
+}
+
+.charging-indicator {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 1.2em;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.warning {
+    color: #ff0000;
+    font-weight: bold;
+}
+
+.charging {
+    background-color: #e0ffe0;
+}
+
+
+/* Add to your stylesheet */
+.robot-card {
+    transition: all 0.3s ease;
+}
+
+.charging {
+    background-color: #f0fff0;
+    border-left: 4px solid #4CAF50;
+}
+
+.low-battery {
+    animation: pulse 1s infinite;
+    border-color: #ff4444 !important;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.charging-indicator {
+    color: #4CAF50;
+    font-size: 1.2em;
+    margin-left: 5px;
+}
+
+.battery-container {
+    height: 20px;
+    background: #eee;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.battery-bar {
+    height: 100%;
+    background: #4CAF50;
+    transition: width 0.5s ease;
+}
+
+.battery-text.warning {
+    color: #ff4444;
+    font-weight: bold;
+}
+
+.robot-controls {
+    margin-top: 10px;
+}
+
+.charge-button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.charge-button[disabled] {
+    background: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Style for new elements */
+.task-tracker {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.end-task-button {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-left: 5px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.end-task-button:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+}
+
+/* System health status */
+.status-good {
+    color: #2ecc71 !important;
+}
+
+.status-average {
+    color: #f39c12 !important;
+}
+
+.status-bad {
+    color: #e74c3c !important;
+    animation: pulse 1s infinite;
+}
+
+/* System health improvement animation */
+.status-improved {
+    animation: highlight-change 3s ease-in-out;
+    font-weight: bold;
+    font-size: 110% !important;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+@keyframes highlight-change {
+    0% { transform: scale(1); text-shadow: none; }
+    10% { transform: scale(1.2); text-shadow: 0 0 10px rgba(46, 204, 113, 0.8); }
+    20% { transform: scale(1); text-shadow: none; }
+    30% { transform: scale(1.1); text-shadow: 0 0 8px rgba(46, 204, 113, 0.8); }
+    100% { transform: scale(1); text-shadow: none; }
+}
+
+/* Prominent error message styles */
+.prominent-error {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.error-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    text-align: center;
+    border-top: 5px solid #e74c3c;
+}
+
+.error-icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.error-message {
+    font-size: 18px;
+    color: #e74c3c;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.error-close-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.error-close-btn:hover {
+    background-color: #c0392b;
+}

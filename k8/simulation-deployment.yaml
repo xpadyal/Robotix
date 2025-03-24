@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simulation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simulation
+  template:
+    metadata:
+      labels:
+        app: simulation
+    spec:
+      containers:
+      - name: simulation
+        image: your-dockerhub-username/python-simulation:latest
+        env:
+        - name: MODE
+          value: "simulation"  # Change to "consumer" for the consumer container
+        ports:
+        - containerPort: 80
