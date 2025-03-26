@@ -1,29 +1,31 @@
-# render.yaml
 services:
   # Redis service
   - type: redis
     name: robotix-redis
     plan: free
     ipAllowList:
-      - 0.0.0.0/0
+      - name: global-access
+        value: 0.0.0.0/0
 
   # Zookeeper service
   - type: web
     name: zookeeper
     env: docker
     plan: free
-    image: bitnami/zookeeper:latest
+    image:
+      name: bitnami/zookeeper:latest
     envVars:
       - key: ALLOW_ANONYMOUS_LOGIN
-        value: yes
-    port: 2181
+        value: "yes"
+    numInstances: 1
 
   # Kafka service
   - type: web
     name: kafka
     env: docker
     plan: free
-    image: wurstmeister/kafka:2.13-2.8.1
+    image:
+      name: wurstmeister/kafka:2.13-2.8.1
     envVars:
       - key: KAFKA_BROKER_ID
         value: "1"
@@ -47,14 +49,15 @@ services:
         value: "3600000"
       - key: JMX_PORT
         value: "9101"
-    port: 9092
+    numInstances: 1
 
   # Simulation service
   - type: worker
     name: simulation
     env: docker
     plan: free
-    image: sahilpadyal237/simulation:latest
+    image:
+      name: sahilpadyal237/simulation:latest
     envVars:
       - key: MODE
         value: simulation
@@ -68,7 +71,8 @@ services:
     name: consumer
     env: docker
     plan: free
-    image: sahilpadyal237/simulation:latest
+    image:
+      name: sahilpadyal237/simulation:latest
     envVars:
       - key: MODE
         value: consumer
@@ -86,10 +90,11 @@ services:
     name: dashboard
     env: docker
     plan: free
-    image: sahilpadyal237/dashboard:latest
-    port: 8080
+    image:
+      name: sahilpadyal237/dashboard:latest
     envVars:
       - key: REDIS_HOST
         value: robotix-redis
       - key: REDIS_PORT
         value: "6379"
+    numInstances: 1
