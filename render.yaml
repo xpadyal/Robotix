@@ -1,0 +1,95 @@
+# render.yaml
+services:
+  # Redis service
+  - type: redis
+    name: robotix-redis
+    plan: free
+    ipAllowList:
+      - 0.0.0.0/0
+
+  # Zookeeper service
+  - type: web
+    name: zookeeper
+    env: docker
+    plan: free
+    image: bitnami/zookeeper:latest
+    envVars:
+      - key: ALLOW_ANONYMOUS_LOGIN
+        value: yes
+    port: 2181
+
+  # Kafka service
+  - type: web
+    name: kafka
+    env: docker
+    plan: free
+    image: wurstmeister/kafka:2.13-2.8.1
+    envVars:
+      - key: KAFKA_BROKER_ID
+        value: "1"
+      - key: KAFKA_ZOOKEEPER_CONNECT
+        value: zookeeper:2181
+      - key: KAFKA_LISTENERS
+        value: PLAINTEXT://0.0.0.0:9092
+      - key: KAFKA_ADVERTISED_LISTENERS
+        value: PLAINTEXT://kafka:9092
+      - key: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+        value: PLAINTEXT:PLAINTEXT
+      - key: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+        value: "true"
+      - key: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+        value: "1"
+      - key: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+        value: "1"
+      - key: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+        value: "1"
+      - key: KAFKA_LOG_RETENTION_MS
+        value: "3600000"
+      - key: JMX_PORT
+        value: "9101"
+    port: 9092
+
+  # Simulation service
+  - type: worker
+    name: simulation
+    env: docker
+    plan: free
+    image: sahilpadyal237/simulation:latest
+    envVars:
+      - key: MODE
+        value: simulation
+      - key: KAFKA_BOOTSTRAP_SERVERS
+        value: kafka:9092
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+  # Consumer service
+  - type: worker
+    name: consumer
+    env: docker
+    plan: free
+    image: sahilpadyal237/simulation:latest
+    envVars:
+      - key: MODE
+        value: consumer
+      - key: KAFKA_BOOTSTRAP_SERVERS
+        value: kafka:9092
+      - key: REDIS_HOST
+        value: robotix-redis
+      - key: REDIS_PORT
+        value: "6379"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+  # Dashboard service (public web service)
+  - type: web
+    name: dashboard
+    env: docker
+    plan: free
+    image: sahilpadyal237/dashboard:latest
+    port: 8080
+    envVars:
+      - key: REDIS_HOST
+        value: robotix-redis
+      - key: REDIS_PORT
+        value: "6379"
