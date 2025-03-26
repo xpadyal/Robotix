@@ -4,16 +4,14 @@ services:
     name: robotix-redis
     plan: free
     ipAllowList:
-      - name: global-access
-        value: 0.0.0.0/0
+      - ip: 0.0.0.0/0
 
   # Zookeeper service
   - type: web
     name: zookeeper
     env: docker
     plan: free
-    image:
-      name: bitnami/zookeeper:latest
+    dockerImage: bitnami/zookeeper:latest
     envVars:
       - key: ALLOW_ANONYMOUS_LOGIN
         value: "yes"
@@ -24,8 +22,7 @@ services:
     name: kafka
     env: docker
     plan: free
-    image:
-      name: wurstmeister/kafka:2.13-2.8.1
+    dockerImage: wurstmeister/kafka:2.13-2.8.1
     envVars:
       - key: KAFKA_BROKER_ID
         value: "1"
@@ -56,8 +53,7 @@ services:
     name: simulation
     env: docker
     plan: free
-    image:
-      name: sahilpadyal237/simulation:latest
+    dockerImage: sahilpadyal237/simulation:latest
     envVars:
       - key: MODE
         value: simulation
@@ -71,8 +67,7 @@ services:
     name: consumer
     env: docker
     plan: free
-    image:
-      name: sahilpadyal237/simulation:latest
+    dockerImage: sahilpadyal237/simulation:latest
     envVars:
       - key: MODE
         value: consumer
@@ -90,8 +85,7 @@ services:
     name: dashboard
     env: docker
     plan: free
-    image:
-      name: sahilpadyal237/dashboard:latest
+    dockerImage: sahilpadyal237/dashboard:latest
     envVars:
       - key: REDIS_HOST
         value: robotix-redis
