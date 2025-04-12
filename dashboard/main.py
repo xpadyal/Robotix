@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,6 +11,10 @@ import os
 import time
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 # Load environment variables
 load_dotenv()
@@ -31,7 +35,16 @@ class TaskAssignment(BaseModel):
 class ChargeCommand(BaseModel):
     charge: bool
 
+# Initialize rate limiter
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="Robot Dashboard API")
+
+# Add rate limit error handler
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Add rate limit middleware
+app.add_middleware(SlowAPIMiddleware)
 
 # Configure CORS
 app.add_middleware(
@@ -51,7 +64,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 def get_redis() -> Redis:
     return Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True, socket_timeout=5)
-
 
 def increment_completed_tasks():
     redis_client = get_redis()
@@ -89,7 +101,8 @@ async def auto_end_task(robot_id: int):
         redis_client.close()
 
 @app.get("/", response_class=HTMLResponse)
-async def get_dashboard():
+@limiter.limit("60/minute")
+async def get_dashboard(request: Request):
     try:
         path = os.path.join(os.path.dirname(__file__), "static", "index.html")
         print(f"Looking for index.html at: {path}")
@@ -124,16 +137,19 @@ async def get_dashboard():
         )
 
 @app.get("/api/test")
-async def test_endpoint():
+@limiter.limit("30/minute")
+async def test_endpoint(request: Request):
     """Simple test endpoint to verify API is working"""
     return {"status": "ok", "message": "API is working"}
 
 @app.get("/api/tasks-completed")
-async def get_completed_tasks_count():
+@limiter.limit("30/minute")
+async def get_completed_tasks_count(request: Request):
     return {"tasks_completed": get_completed_tasks()}
 
 @app.get("/api/debug")
-async def debug_info():
+@limiter.limit("10/minute")
+async def debug_info(request: Request):
     """Debug endpoint to help diagnose connectivity issues"""
     return {
         "server_info": {
@@ -148,7 +164,8 @@ async def debug_info():
     }
 
 @app.get("/api/health")
-async def health_check():
+@limiter.limit("60/minute")
+async def health_check(request: Request):
     """Health check endpoint to verify Redis connection"""
     redis_client = None
     try:
@@ -171,9 +188,9 @@ async def health_check():
             except Exception as e:
                 print(f"Error closing Redis connection: {str(e)}")
 
-# main.py (updated code)
 @app.get("/api/robot-status", response_model=List[RobotStatus])
-async def get_robot_status():
+@limiter.limit("120/minute")
+async def get_robot_status(request: Request):
     redis_client = None
     try:
         redis_client = get_redis()
@@ -224,7 +241,8 @@ async def get_robot_status():
             redis_client.close()
             
 @app.post("/api/control/robot/{robot_id}/task")
-async def assign_task(robot_id: int, task: TaskAssignment):
+@limiter.limit("30/minute")
+async def assign_task(request: Request, robot_id: int, task: TaskAssignment):
     redis_client = None
     try:
         redis_client = get_redis()
@@ -264,7 +282,8 @@ async def assign_task(robot_id: int, task: TaskAssignment):
             redis_client.close()
 
 @app.post("/api/control/robot/{robot_id}/charge")
-async def charge_robot(robot_id: int, cmd: ChargeCommand):
+@limiter.limit("30/minute")
+async def charge_robot(request: Request, robot_id: int, cmd: ChargeCommand):
     redis_client = None
     try:
         redis_client = get_redis()
@@ -292,10 +311,9 @@ async def charge_robot(robot_id: int, cmd: ChargeCommand):
         if redis_client:
             redis_client.close()
 
-
-
 @app.post("/api/control/robot/{robot_id}/end-task")
-async def end_task(robot_id: int):
+@limiter.limit("30/minute")
+async def end_task(request: Request, robot_id: int):
     redis_client = None
     try:
         redis_client = get_redis()
@@ -324,8 +342,6 @@ async def end_task(robot_id: int):
         if redis_client:
             redis_client.close()
 
-
-
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080) 
+    uvicorn.run(app, host="0.0.0.0", port=8080)
